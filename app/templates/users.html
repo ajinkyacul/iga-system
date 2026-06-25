@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>User Management</h1>
+    <a href="{{ url_for('users.create_user') }}" class="btn btn-primary">Create User</a>
+</div>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.full_name or '-' }}</td>
+                <td>{{ user.department or '-' }}</td>
+                <td>
+                    {% for role in user.roles %}
+                    <span class="badge badge-role">{{ role.name }}</span>
+                    {% else %}
+                    <span class="badge badge-muted">None</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if user.is_active %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('users.edit_user', user_id=user.id) }}" class="btn btn-sm btn-info">Edit</a>
+                    <form method="POST" action="{{ url_for('users.delete_user', user_id=user.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this user?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="9">No users found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

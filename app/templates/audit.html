@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Audit Log</h1>
+</div>
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% else %}
+<div class="filters">
+    <form method="GET">
+        <select name="action">
+            <option value="">All Actions</option>
+            {% for action in actions %}
+            <option value="{{ action }}" {% if request.args.get('action') == action %}selected{% endif %}>{{ action }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="username" placeholder="Filter by username" value="{{ request.args.get('username', '') }}">
+        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+        <a href="{{ url_for('audit.view_audit') }}" class="btn btn-sm btn-secondary">Clear</a>
+    </form>
+</div>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Username</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Details</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs.items %}
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ log.username }}</td>
+                <td><span class="badge badge-action">{{ log.action }}</span></td>
+                <td>{{ log.target_type }} #{{ log.target_id or '-' }}</td>
+                <td>{{ log.details }}</td>
+                <td>{{ log.ip_address }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7">No audit logs found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="pagination">
+    {% if logs.has_prev %}
+    <a href="{{ url_for('audit.view_audit', page=logs.prev_num, action=request.args.get('action', ''), username=request.args.get('username', '')) }}" class="btn btn-sm">Previous</a>
+    {% endif %}
+    <span>Page {{ logs.page }} of {{ logs.pages }}</span>
+    {% if logs.has_next %}
+    <a href="{{ url_for('audit.view_audit', page=logs.next_num, action=request.args.get('action', ''), username=request.args.get('username', '')) }}" class="btn btn-sm">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

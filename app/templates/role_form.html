@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if role else 'Create' }} Role{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>{{ 'Edit' if role else 'Create' }} Role</h1>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if not role %}
+        <div class="form-group">
+            <label for="name">Role Name *</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., Developer, Manager">
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Role description">{{ role.description if role else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Permissions</label>
+            {% set cats = permissions|map(attribute='category')|unique|list %}
+            {% for category in cats %}
+            <div class="permission-category">
+                <h4>{{ category }}</h4>
+                <div class="checkbox-group">
+                    {% for perm in permissions if perm.category == category %}
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}"
+                        {% if role and perm in role.permissions %}checked{% endif %}>
+                        <strong>{{ perm.name }}</strong>
+                        {% if perm.description %}<small>{{ perm.description }}</small>{% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ 'Update' if role else 'Create' }} Role</button>
+            <a href="{{ url_for('roles.list_roles') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

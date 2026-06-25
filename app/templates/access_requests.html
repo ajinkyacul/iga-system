@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Access Requests{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Access Requests</h1>
+    <a href="{{ url_for('requests.create_request') }}" class="btn btn-primary">New Request</a>
+</div>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Requestor</th>
+                <th>Role</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Approved By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ req.id }}</td>
+                <td>{{ req.requestor.username }}</td>
+                <td>{{ req.role.name }}</td>
+                <td>{{ req.reason or '-' }}</td>
+                <td>
+                    {% if req.status == 'pending' %}
+                    <span class="badge badge-warning">Pending</span>
+                    {% elif req.status == 'approved' %}
+                    <span class="badge badge-success">Approved</span>
+                    {% else %}
+                    <span class="badge badge-danger">Denied</span>
+                    {% endif %}
+                </td>
+                <td>{{ req.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ req.approver.username if req.approver else '-' }}</td>
+                <td class="actions">
+                    {% if req.status == 'pending' and current_user.is_admin %}
+                    <form method="POST" action="{{ url_for('requests.approve_request', req_id=req.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('requests.deny_request', req_id=req.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="text" name="denied_reason" placeholder="Reason" required style="width:150px;padding:2px 4px;">
+                        <button type="submit" class="btn btn-sm btn-danger">Deny</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8">No access requests found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Request Access{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>Request Role Access</h1>
+    <form method="POST" action="{{ url_for('requests.create_request') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="role_id">Select Role *</label>
+            <select id="role_id" name="role_id" required>
+                <option value="">-- Select a role --</option>
+                {% for role in roles %}
+                <option value="{{ role.id }}">{{ role.name }} - {{ role.description or '' }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="reason">Business Reason</label>
+            <textarea id="reason" name="reason" placeholder="Explain why you need this access" rows="4"></textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+            <a href="{{ url_for('requests.list_requests') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

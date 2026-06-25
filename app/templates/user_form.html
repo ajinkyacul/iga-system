@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if user else 'Create' }} User{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>{{ 'Edit' if user else 'Create' }} User</h1>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if not user %}
+        <div class="form-group">
+            <label for="username">Username *</label>
+            <input type="text" id="username" name="username" required placeholder="Username">
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required value="{{ user.email if user else '' }}" placeholder="Email">
+        </div>
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" value="{{ user.full_name if user else '' }}" placeholder="Full Name">
+        </div>
+        <div class="form-group">
+            <label for="department">Department</label>
+            <input type="text" id="department" name="department" value="{{ user.department if user else '' }}" placeholder="Department">
+        </div>
+        <div class="form-group">
+            <label for="password">{{ 'New Password (leave blank to keep)' if user else 'Password *' }}</label>
+            <input type="password" id="password" name="password" {{ 'required' if not user else '' }} placeholder="Password">
+        </div>
+        {% if user %}
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="is_active" {{ 'checked' if user.is_active else '' }}>
+                Active
+            </label>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label>Roles</label>
+            <div class="checkbox-group">
+                {% for role in roles %}
+                <label class="checkbox-label">
+                    <input type="checkbox" name="roles" value="{{ role.id }}"
+                    {% if user and role in user.roles %}checked{% endif %}>
+                    {{ role.name }}
+                    {% if role.description %}<small>{{ role.description }}</small>{% endif %}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ 'Update' if user else 'Create' }} User</button>
+            <a href="{{ url_for('users.list_users') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
